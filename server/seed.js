@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const db = require('./src/config/db'); // <-- updated path
+const db = require('./src/config/db'); 
 
 async function seed() {
   console.log('Reading schema.sql...');
-  const schemaPath = path.join(__dirname, '../database/schema.sql'); // <-- updated path
+  const schemaPath = path.join(__dirname, '../database/schema.sql'); 
   const schema = fs.readFileSync(schemaPath, 'utf8');
 
   // Execute schema to create tables

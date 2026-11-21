@@ -4,13 +4,13 @@ const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET /api/categories (Public)
+// GET (Public)
 router.get('/', (req, res) => {
   const categories = db.prepare('SELECT * FROM categories ORDER BY display_order ASC, id ASC').all();
   res.json(categories);
 });
 
-// POST /api/categories (Admin only)
+// POST (Admin only)
 router.post('/', authenticateToken, authorizeRoles('admin'), (req, res) => {
   const { name, display_order = 0 } = req.body;
 
@@ -33,7 +33,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), (req, res) => {
   }
 });
 
-// PUT /api/categories/:id (Admin only)
+// PUT (Admin only)
 router.put('/:id', authenticateToken, authorizeRoles('admin'), (req, res) => {
   const { name, display_order } = req.body;
   const { id } = req.params;
@@ -62,7 +62,7 @@ router.put('/:id', authenticateToken, authorizeRoles('admin'), (req, res) => {
   }
 });
 
-// DELETE /api/categories/:id (Admin only)
+// DELETE (Admin only)
 router.delete('/:id', authenticateToken, authorizeRoles('admin'), (req, res) => {
   try {
     const result = db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id);
