@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
 
   const { login, register } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -30,15 +32,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-container">
-      <h2>{isRegister ? 'Create Account' : 'Login'}</h2>
+    <div className="auth-container editorial-card">
+      <p className="eyebrow">Georgian Restaurant</p>
+      <h2>{isRegister ? t('Create Account') : t('Login')}</h2>
       {error && <p className="error">{error}</p>}
 
       <form onSubmit={handleSubmit}>
         {isRegister && (
           <input
             type="text"
-            placeholder="Full Name"
+            placeholder={t('Full Name')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -46,19 +49,19 @@ export default function LoginPage() {
         )}
         <input
           type="email"
-          placeholder="Email"
+          placeholder={t('Email')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
           type="password"
-          placeholder="Password (min 6 chars)"
+          placeholder={t('Password (min 6 chars)')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">{isRegister ? 'Register' : 'Login'}</button>
+        <button className="btn-primary" type="submit">{isRegister ? t('Register') : t('Login')}</button>
       </form>
 
       <button
@@ -69,7 +72,7 @@ export default function LoginPage() {
           setError('');
         }}
       >
-        {isRegister ? 'Already have an account? Login' : 'Need an account? Register'}
+        {isRegister ? t('Already have an account? Login') : t('Need an account? Register')}
       </button>
     </div>
   );

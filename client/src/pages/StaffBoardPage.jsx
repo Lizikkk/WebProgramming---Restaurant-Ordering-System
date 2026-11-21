@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { apiFetch } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import ConfirmModal from '../components/ConfirmModal';
+import { useLanguage } from '../context/LanguageContext';
 
 const STATUSES = ['New', 'Preparing', 'Ready', 'Delivered'];
 
@@ -11,6 +12,7 @@ export default function StaffBoardPage() {
   const [deleteOrderId, setDeleteOrderId] = useState(null);
 
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const loadOrders = () => {
     apiFetch('/orders')
@@ -53,8 +55,8 @@ export default function StaffBoardPage() {
   return (
     <div className="container">
       <div className="board-header">
-        <h2>Kitchen Orders Board</h2>
-        <button onClick={loadOrders}>Refresh Orders</button>
+        <p className="eyebrow">Georgian Restaurant</p><h2>{t('Kitchen Orders Board')}</h2>
+        <button onClick={loadOrders}>{t('Refresh Orders')}</button>
       </div>
       {error && <p className="error">{error}</p>}
 
@@ -66,13 +68,13 @@ export default function StaffBoardPage() {
           return (
             <div key={status} className="kanban-column">
               <h3>
-                {status} ({columnOrders.length})
+                {t(status)} ({columnOrders.length})
               </h3>
 
               {columnOrders.map((order) => (
                 <div key={order.id} className="kitchen-card">
                   <div className="kitchen-card-header">
-                    <strong>Order #{order.id}</strong>
+                    <strong>{t('Order')} #{order.id}</strong>
                     <span>{order.customer_name}</span>
                   </div>
 
@@ -85,7 +87,7 @@ export default function StaffBoardPage() {
                   </ul>
 
                   <p className="total">
-                    <strong>Total: ${Number(order.total_price).toFixed(2)}</strong>
+                    <strong>{t('Total')}: {Number(order.total_price).toFixed(2)} ₾</strong>
                   </p>
 
                   <div className="kitchen-card-actions">
@@ -94,7 +96,7 @@ export default function StaffBoardPage() {
                         className="btn-primary"
                         onClick={() => updateStatus(order.id, nextStatus)}
                       >
-                        Move to {nextStatus} →
+                        {t('Move to')} {t(nextStatus)} →
                       </button>
                     )}
 
@@ -103,7 +105,7 @@ export default function StaffBoardPage() {
                         className="btn-danger"
                         onClick={() => setDeleteOrderId(order.id)}
                       >
-                        Delete
+                        {t('Delete')}
                       </button>
                     )}
                   </div>
@@ -116,7 +118,7 @@ export default function StaffBoardPage() {
 
       <ConfirmModal
         isOpen={Boolean(deleteOrderId)}
-        title="Delete Order"
+        title={`${t('Delete')} ${t('Order')}`}
         message={`Are you sure you want to permanently delete Order #${deleteOrderId}?`}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteOrderId(null)}
