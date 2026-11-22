@@ -3,16 +3,17 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
-
 import LoginPage from './pages/LoginPage';
 import MenuPage from './pages/MenuPage';
+import CartPage from './pages/CartPage';
+import AccountPage from './pages/AccountPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import StaffBoardPage from './pages/StaffBoardPage';
 import AdminPage from './pages/AdminPage';
 import LandingPage from './pages/LandingPage';
 import TeamPage from './pages/TeamPage';
-import { LanguageProvider } from './context/LanguageContext';
 import ContactPage from './pages/ContactPage';
+import { LanguageProvider } from './context/LanguageContext';
 
 function AppContent() {
   const location = useLocation();
@@ -26,35 +27,13 @@ function AppContent() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/menu" element={<MenuPage />} />
+          <Route path="/cart" element={<CartPage />} />
           <Route path="/team" element={<TeamPage />} />
           <Route path="/contact" element={<ContactPage />} />
-
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute allowedRoles={['customer']}>
-                <MyOrdersPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/kitchen"
-            element={
-              <ProtectedRoute allowedRoles={['staff', 'admin']}>
-                <StaffBoardPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute allowedRoles={['customer']}><MyOrdersPage /></ProtectedRoute>} />
+          <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['staff', 'admin']}><StaffBoardPage /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
@@ -65,13 +44,13 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-    <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </CartProvider>
-    </AuthProvider>
+      <AuthProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
     </LanguageProvider>
   );
 }

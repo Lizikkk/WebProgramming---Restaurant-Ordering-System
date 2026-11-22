@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const LanguageContext = createContext(null);
 
@@ -29,7 +29,7 @@ const translations = {
     'We bring Georgian hospitality to every guest, with recipes, traditions and the joy of sharing food.': 'თითოეულ სტუმარს ქართულ სტუმართმოყვარეობას ვუზიარებთ — ტრადიციული რეცეპტებითა და ერთად ყოფნის სიხარულით.',
     'Our philosophy': 'ჩვენი ხედვა', 'Food tastes better when shared.': 'საჭმელი უფრო გემრიელია, როცა მას ერთად ვუზიარებთ.',
     'Contact us': 'დაგვიკავშირდით','Get in touch': 'დაგვიკავშირდით','Contact Us': 'კონტაქტი','We would love to welcome you to our table.': 'მოხარულები ვიქნებით, თუ ჩვენს სუფრას ესტუმრებით.','Working Hours': 'სამუშაო საათები','Monday – Sunday': 'ორშაბათი – კვირა','Hours to be confirmed': 'სამუშაო საათები დაზუსტდება','Phone': 'ტელეფონი','Call us for reservations and questions.': 'დაგვიკავშირდით ჯავშნებისა და კითხვებისთვის.','Phone number to be added': 'ტელეფონის ნომერი დაემატება','Location': 'მისამართი','Come and visit us.': 'გვეწვიეთ ჩვენს რესტორანში.','Address to be added': 'მისამართი დაემატება','Send us your questions.': 'მოგვწერეთ თქვენი კითხვები.','Email address to be added': 'ელფოსტის მისამართი დაემატება', 'Back to home': 'მთავარ გვერდზე დაბრუნება', 'Home': 'მთავარი', 'MyBasket': 'კალათა',
-    'Logout': 'გასვლა', 'ID': 'ID', 'Items': 'კერძები', 'Order #': 'შეკვეთა №', 'Role': 'როლი', 'Name': 'სახელი', 'Manage All Orders': 'ყველა შეკვეთის მართვა', 'Manage User Roles': 'მომხმარებლების როლების მართვა', 'Are you sure you want to cancel Order': 'ნამდვილად გსურთ შეკვეთის გაუქმება', 'Confirm Delete': 'წაშლის დადასტურება',
+    'Logout': 'გასვლა', 'ID': 'ID', 'Items': 'კერძები', 'View Cart': 'კალათის ნახვა', 'Items in cart': 'კალათაშია', 'Review your selected dishes before placing your order.': 'შეკვეთის განთავსებამდე გადაამოწმეთ არჩეული კერძები.', 'Decrease quantity': 'რაოდენობის შემცირება', 'Increase quantity': 'რაოდენობის გაზრდა', 'Remove': 'ამოშლა', 'each': 'ცალი', 'Continue shopping': 'შოპინგის გაგრძელება', 'Order placed successfully!': 'შეკვეთა წარმატებით განთავსდა!', 'Could not place your order.': 'შეკვეთის განთავსება ვერ მოხერხდა.', 'Only customer accounts can place orders.': 'შეკვეთის განთავსება მხოლოდ მომხმარებლის ანგარიშით შეგიძლიათ.', 'Placing order...': 'შეკვეთა იგზავნება...', 'View My Orders': 'ჩემი შეკვეთების ნახვა', 'My Account': 'ჩემი ანგარიში', 'You are already signed in.': 'თქვენ უკვე შესული ხართ ანგარიშში.', 'Signed in as': 'შესული ხართ როგორც', 'Go to My Account': 'ჩემს ანგარიშზე გადასვლა', 'customer': 'მომხმარებელი', 'staff': 'პერსონალი', 'admin': 'ადმინისტრატორი', 'Order #': 'შეკვეთა №', 'Role': 'როლი', 'Name': 'სახელი', 'Manage All Orders': 'ყველა შეკვეთის მართვა', 'Manage User Roles': 'მომხმარებლების როლების მართვა', 'Are you sure you want to cancel Order': 'ნამდვილად გსურთ შეკვეთის გაუქმება', 'Confirm Delete': 'წაშლის დადასტურება',
     'Are you sure you want to delete this item?': 'ნამდვილად გსურთ ამ ელემენტის წაშლა?',
     'Main Dishes': 'ძირითადი კერძები', 'Menu categories': 'მენიუს კატეგორიები', 'Loading menu...': 'მენიუ იტვირთება...',
     'Price (₾)': 'ფასი (₾)', 'Georgian menu setup': 'ქართული მენიუს მომზადება',
@@ -90,8 +90,8 @@ export function LanguageProvider({ children }) {
   }, [language]);
 
   const toggleLanguage = () => setLanguage((current) => current === 'en' ? 'ka' : 'en');
-  const t = (value) => language === 'ka' ? (translations.ka[value] || value) : value;
-  const value = useMemo(() => ({ language, toggleLanguage, t }), [language]);
+  const t = useCallback((value) => language === 'ka' ? (translations.ka[value] || value) : value, [language]);
+  const value = useMemo(() => ({ language, toggleLanguage, t }), [language, t]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }

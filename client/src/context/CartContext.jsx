@@ -1,63 +1,114 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext';
 
-const CartContext = createContext();
+const CartContext = createContext(null);
+
+function readCart(storageKey) {
+  try {
+    const saved = localStorage.getItem(storageKey);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState(() => {
-    try {
-      const saved = localStorage.getItem('restaurant_cart');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const { user, loading: authLoading } = useAuth();
+  const ownerKey = user ? `restaurant_cart_user_${user.id}` : 'restaurant_cart_guest';
+  const [cart, setCart] = useState([]);
+  const [loadedKey, setLoadedKey] = useState(null);
 
+  // Load a separate cart whenever the signed-in account changes.
   useEffect(() => {
-    localStorage.setItem('restaurant_cart', JSON.stringify(cart));
-  }, [cart]);
+    if (authLoading) return;
+    setCart(readCart(ownerKey));
+    setLoadedKey(ownerKey);
+  }, [ownerKey, authLoading]);
+
+  // Do not save the previous account's cart under the next account's key.
+  useEffect(() => {
+    if (authLoading || loadedKey !== ownerKey) return;
+    localStorage.setItem(ownerKey, JSON.stringify(cart));
+  }, [cart, ownerKey, loadedKey, authLoading]);
 
   const addToCart = (item) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.menu_item_id === item.id);
+    setCart((previous) => {
+      const existing = previous.find((cartItem) => cartItem.menu_item_id === item.id);
       if (existing) {
-        return prev.map((i) =>
-          i.menu_item_id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        return previous.map((cartItem) =>
+          cartItem.menu_item_id === item.id
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
         );
       }
       return [
-        ...prev,
-        { menu_item_id: item.id, name: item.name, price: item.price, quantity: 1 },
+        ...previous,
+        {
+          menu_item_id: item.id,
+          name: item.name,
+          price: Number(item.price),
+          quantity: 1,
+        },
       ];
     });
   };
 
   const updateQuantity = (menuItemId, quantity) => {
     if (quantity <= 0) {
-      setCart((prev) => prev.filter((i) => i.menu_item_id !== menuItemId));
-    } else {
-      setCart((prev) =>
-        prev.map((i) =>
-          i.menu_item_id === menuItemId ? { ...i, quantity } : i
-        )
-      );
+      setCart((previous) => previous.filter((item) => item.menu_item_id !== menuItemId));
+      return;
     }
+    setCart((previous) => previous.map((item) =>
+      item.menu_item_id === menuItemId ? { ...item, quantity } : item
+    ));
   };
 
-  const clearCart = () => {
-    setCart([]);
-    localStorage.removeItem('restaurant_cart');
+  const removeFromCart = (menuItemId) => {
+    setCart((previous) => previous.filter((item) => item.menu_item_id !== menuItemId));
   };
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const clearCart = () => setCart([]);
+
+  const mergeGuestCartForUser = (userId) => {
+    const guestCart = readCart('restaurant_cart_guest');
+    const accountKey = `restaurant_cart_user_${userId}`;
+    const accountCart = readCart(accountKey);
+    const merged = [...accountCart];
+
+    guestCart.forEach((guestItem) => {
+      const existing = merged.find((item) => item.menu_item_id === guestItem.menu_item_id);
+      if (existing) existing.quantity += guestItem.quantity;
+      else merged.push(guestItem);
+    });
+
+    localStorage.setItem(accountKey, JSON.stringify(merged));
+    localStorage.removeItem('restaurant_cart_guest');
+    setCart(merged);
+    setLoadedKey(accountKey);
+  };
+
+  const totalPrice = cart.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
   const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CartContext.Provider
-      value={{ cart, addToCart, updateQuantity, clearCart, totalPrice, totalCount }}
-    >
+    <CartContext.Provider value={{
+      cart,
+      addToCart,
+      updateQuantity,
+      removeFromCart,
+      clearCart,
+      mergeGuestCartForUser,
+      totalPrice,
+      totalCount,
+    }}>
       {children}
     </CartContext.Provider>
   );
 }
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) throw new Error('useCart must be used within CartProvider');
+  return context;
+};

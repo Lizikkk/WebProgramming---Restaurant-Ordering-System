@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { apiFetch } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -56,12 +56,10 @@ export default function MenuPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
-  const [orderMessage, setOrderMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
   const { user } = useAuth();
-  const { cart, addToCart, updateQuantity, clearCart, totalPrice } = useCart();
-  const navigate = useNavigate();
+  const { addToCart, totalCount } = useCart();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -84,17 +82,7 @@ export default function MenuPage() {
     return matchesCategory && matchesSearch;
   });
 
-  const handleCheckout = async () => {
-    if (!user) { navigate('/login'); return; }
-    setError('');
-    setOrderMessage('');
-    try {
-      const payload = { items: cart.map((c) => ({ menu_item_id: c.menu_item_id, quantity: c.quantity })) };
-      await apiFetch('/orders', { method: 'POST', body: JSON.stringify(payload) });
-      clearCart();
-      setOrderMessage(t('Order placed successfully! View it in My Orders.'));
-    } catch (err) { setError(err.message); }
-  };
+
 
   return (
     <div className="georgian-menu-page">
@@ -103,7 +91,10 @@ export default function MenuPage() {
         <h1 className="menu-page-title">{t('Menu')}</h1>
         <p className="menu-intro">{t('A taste of Georgia, made to be shared.')}</p>
         {error && <p className="error" role="alert">{error}</p>}
-        {orderMessage && <p className="success" role="status">{orderMessage}</p>}
+
+        {(!user || user.role === 'customer') && (
+          <div className="menu-cart-shortcut"><span>{t('Items in cart')}: {totalCount}</span><Link className="btn-primary" to="/cart">{t('View Cart')}</Link></div>
+        )}
 
         <input type="search" className="search-input" placeholder={t('Search dishes by name or description...')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
 
@@ -132,29 +123,6 @@ export default function MenuPage() {
           </div>
         )}
       </section>
-
-      {(!user || user.role === 'customer') && (
-        <aside className="cart-sidebar menu-cart-section" id="cart">
-          <h3>{t('Your Cart')}</h3>
-          {cart.length === 0 ? <p>{t('Your cart is empty.')}</p> : (
-            <>
-              <ul className="cart-list">
-                {cart.map((item) => (
-                  <li key={item.menu_item_id} className="cart-item">
-                    <div><strong>{t(item.name)}</strong><p>{formatPrice(item.price * item.quantity)}</p></div>
-                    <div className="qty-controls">
-                      <button aria-label={t('Decrease quantity')} onClick={() => updateQuantity(item.menu_item_id, item.quantity - 1)}>-</button>
-                      <span>{item.quantity}</span>
-                      <button aria-label={t('Increase quantity')} onClick={() => updateQuantity(item.menu_item_id, item.quantity + 1)}>+</button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <div className="cart-footer"><p><strong>{t('Total')}: {formatPrice(totalPrice)}</strong></p><button className="btn-primary" onClick={handleCheckout}>{user ? t('Place Order') : t('Login to Order')}</button></div>
-            </>
-          )}
-        </aside>
-      )}
     </div>
   );
 }

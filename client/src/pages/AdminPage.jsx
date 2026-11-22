@@ -8,44 +8,6 @@ import { useLanguage } from '../context/LanguageContext';
 const ORDER_STATUSES = ['New', 'Preparing', 'Ready', 'Delivered'];
 const USER_ROLES = ['customer', 'staff', 'admin'];
 
-const GEORGIAN_MENU = [
-  { category: 'Appetizers', name: 'Badrijani Nigvzit', description: 'Eggplant rolls filled with seasoned walnut paste and pomegranate.', price: 12, image_url: '' },
-  { category: 'Appetizers', name: 'Pkhali Selection', description: 'Traditional spinach, beet and vegetable pâtés with walnuts.', price: 14, image_url: '' },
-  { category: 'Appetizers', name: 'Georgian Salad with Walnuts', description: 'Fresh tomatoes, cucumber, herbs and crushed walnuts.', price: 13, image_url: '' },
-  { category: 'Appetizers', name: 'Jonjoli', description: 'Traditional Georgian pickled jonjoli with herbs and oil.', price: 9, image_url: '' },
-  { category: 'Appetizers', name: 'Satsivi', description: 'Tender chicken served in a rich, aromatic walnut sauce.', price: 18, image_url: '' },
-  { category: 'Appetizers', name: 'Gebzhalia', description: 'Minty cheese rolls served with a delicate dairy sauce.', price: 16, image_url: '' },
-  { category: 'Appetizers', name: 'Mchadi', description: 'Traditional Georgian cornbread, baked until golden.', price: 5, image_url: '' },
-  { category: 'Appetizers', name: 'Sulguni Cheese', description: 'Slices of traditional Georgian brined cheese.', price: 10, image_url: '' },
-  { category: 'Main Dishes', name: 'Adjarian Khachapuri', description: 'Boat-shaped bread filled with cheese, topped with egg and butter.', price: 19, image_url: '' },
-  { category: 'Main Dishes', name: 'Imeretian Khachapuri', description: 'Soft golden bread filled with Imeretian cheese.', price: 17, image_url: '' },
-  { category: 'Main Dishes', name: 'Megruli Khachapuri', description: 'Cheese-filled bread with an extra layer of cheese on top.', price: 20, image_url: '' },
-  { category: 'Main Dishes', name: 'Khinkali', description: 'Juicy Georgian dumplings with seasoned meat and broth.', price: 2.50, image_url: '' },
-  { category: 'Main Dishes', name: 'Cheese Khinkali', description: 'Georgian dumplings filled with melted cheese.', price: 2.50, image_url: '' },
-  { category: 'Main Dishes', name: 'Lobiani', description: 'Traditional baked bread filled with seasoned beans.', price: 12, image_url: '' },
-  { category: 'Main Dishes', name: 'Mtsvadi', description: 'Charcoal-grilled meat skewers with onion and fresh herbs.', price: 24, image_url: '' },
-  { category: 'Main Dishes', name: 'Ojakhuri', description: 'Pan-fried meat and potatoes with Georgian spices.', price: 22, image_url: '' },
-  { category: 'Main Dishes', name: 'Chakapuli', description: 'Aromatic seasonal stew with tarragon, herbs and sour plum.', price: 26, image_url: '' },
-  { category: 'Main Dishes', name: 'Chashushuli', description: 'Slow-cooked beef stew with tomatoes and Georgian spices.', price: 23, image_url: '' },
-  { category: 'Main Dishes', name: 'Shkmeruli', description: 'Chicken in a rich garlic and milk sauce.', price: 25, image_url: '' },
-  { category: 'Main Dishes', name: 'Kharcho', description: 'Traditional Georgian beef soup with rice, herbs and spices.', price: 17, image_url: '' },
-  { category: 'Desserts', name: 'Churchkhela', description: 'Walnuts threaded on a string and coated in thickened grape juice.', price: 8, image_url: '' },
-  { category: 'Desserts', name: 'Pelamushi', description: 'Traditional Georgian grape pudding.', price: 9, image_url: '' },
-  { category: 'Desserts', name: 'Gozinaki', description: 'Crunchy walnuts bound with golden honey.', price: 10, image_url: '' },
-  { category: 'Desserts', name: 'Kada', description: 'Traditional Georgian pastry with a sweet, buttery filling.', price: 8, image_url: '' },
-  { category: 'Desserts', name: 'Nazuki', description: 'Sweet Georgian bread scented with warm spices.', price: 7, image_url: '' },
-  { category: 'Drinks', name: 'Tarkhuna Lemonade', description: 'Classic Georgian tarragon lemonade.', price: 4.5, image_url: '' },
-  { category: 'Drinks', name: 'Pear Lemonade', description: 'Refreshing Georgian-style pear lemonade.', price: 4.5, image_url: '' },
-  { category: 'Drinks', name: 'Lemon Lemonade', description: 'Fresh and sparkling lemon lemonade.', price: 4, image_url: '' },
-  { category: 'Drinks', name: 'Natakhtari Lemonade', description: 'Popular Georgian bottled lemonade.', price: 4, image_url: '' },
-  { category: 'Drinks', name: 'Borjomi', description: 'Naturally carbonated Georgian mineral water.', price: 3.5, image_url: '' },
-  { category: 'Drinks', name: 'Nabeghlavi', description: 'Georgian sparkling mineral water.', price: 3, image_url: '' },
-  { category: 'Drinks', name: 'Homemade Fruit Compote', description: 'Traditional chilled fruit compote, made in-house.', price: 5, image_url: '' },
-];
-
-const normalizeName = (value) => String(value || '').trim().toLowerCase();
-const CATEGORY_ALIASES = { Appetizers: ['appetizers', 'starters'], 'Main Dishes': ['main dishes', 'main dish', 'main courses'], Desserts: ['desserts'], Drinks: ['drinks'] };
-
 const EMPTY_ITEM_FORM = {
   category_id: '',
   name: '',
@@ -67,7 +29,6 @@ export default function AdminPage() {
   const [availabilityFilter, setAvailabilityFilter] = useState('all');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [isImportingMenu, setIsImportingMenu] = useState(false);
 
   // Category form state
   const [catName, setCatName] = useState('');
@@ -88,7 +49,7 @@ export default function AdminPage() {
     try {
       const [cats, items, allOrders, allUsers] = await Promise.all([
         apiFetch('/categories'),
-        apiFetch('/menu'),
+        apiFetch('/menu?all=true'),
         apiFetch('/orders'),
         apiFetch('/auth/users'),
       ]);
@@ -274,81 +235,6 @@ export default function AdminPage() {
     }
   };
 
-  // Populate the database through the existing admin API (no server files or schema changes).
-  const importGeorgianMenu = async () => {
-    clearMessages();
-    setIsImportingMenu(true);
-    try {
-      let currentCategories = await apiFetch('/categories');
-      const categoryIds = {};
-      const categoryPlan = [
-        { name: 'Appetizers', display_order: 1 },
-        { name: 'Main Dishes', display_order: 2 },
-        { name: 'Desserts', display_order: 3 },
-        { name: 'Drinks', display_order: 4 },
-      ];
-
-      for (const wanted of categoryPlan) {
-        const aliases = CATEGORY_ALIASES[wanted.name];
-        let category = currentCategories.find((cat) => aliases.includes(normalizeName(cat.name)));
-        if (category) {
-          if (category.name !== wanted.name || category.display_order !== wanted.display_order) {
-            category = await apiFetch(`/categories/${category.id}`, {
-              method: 'PUT',
-              body: JSON.stringify(wanted),
-            });
-          }
-        } else {
-          category = await apiFetch('/categories', {
-            method: 'POST',
-            body: JSON.stringify(wanted),
-          });
-          currentCategories = [...currentCategories, category];
-        }
-        categoryIds[wanted.name] = category.id;
-      }
-
-      const existingItems = await apiFetch('/menu?all=true');
-      const desiredNames = new Set(GEORGIAN_MENU.map((item) => normalizeName(item.name)));
-      for (const oldItem of existingItems) {
-        if (!desiredNames.has(normalizeName(oldItem.name)) && oldItem.is_available) {
-          await apiFetch(`/menu/${oldItem.id}/availability`, {
-            method: 'PATCH',
-            body: JSON.stringify({ is_available: false }),
-          });
-        }
-      }
-
-      let added = 0;
-      let updated = 0;
-      for (const dish of GEORGIAN_MENU) {
-        const existing = existingItems.find((item) => normalizeName(item.name) === normalizeName(dish.name));
-        const payload = {
-          category_id: categoryIds[dish.category],
-          name: dish.name,
-          description: dish.description,
-          price: dish.price,
-          image_url: dish.image_url,
-          is_available: true,
-        };
-        if (existing) {
-          await apiFetch(`/menu/${existing.id}`, { method: 'PUT', body: JSON.stringify(payload) });
-          updated += 1;
-        } else {
-          await apiFetch('/menu', { method: 'POST', body: JSON.stringify(payload) });
-          added += 1;
-        }
-      }
-
-      setSuccess(`Georgian menu ready: ${added} dishes added, ${updated} updated, and old sample items hidden.`);
-      await loadData();
-    } catch (err) {
-      setError(err.message || 'Could not populate the Georgian menu. Please check your admin login and try again.');
-    } finally {
-      setIsImportingMenu(false);
-    }
-  };
-
   // ---------------- ORDER HANDLERS ----------------
 
   const handleOrderStatusChange = async (orderId, newStatus) => {
@@ -488,15 +374,6 @@ export default function AdminPage() {
       {activeTab === 'menu' && (
         <section className="admin-section">
           <h3>{editingItemId !== null ? t('Edit Menu Item') : t('Add Menu Item')}</h3>
-          <div className="menu-import-panel">
-            <div>
-              <strong>{t('Georgian menu setup')}</strong>
-              <p>{t('Add the agreed Georgian dishes and drinks using the existing API. Existing sample dishes will be hidden, not deleted.')}</p>
-            </div>
-            <button type="button" className="btn-primary" onClick={importGeorgianMenu} disabled={isImportingMenu}>
-              {isImportingMenu ? t('Adding menu...') : t('Populate Georgian Menu')}
-            </button>
-          </div>
 
           <form onSubmit={handleMenuSubmit} className="stack-form">
             <select

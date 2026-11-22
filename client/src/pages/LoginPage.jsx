@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function LoginPage() {
@@ -10,9 +11,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const { login, register } = useAuth();
+  const { login, register, user } = useAuth();
+  const { mergeGuestCartForUser } = useCart();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,13 +26,27 @@ export default function LoginPage() {
         ? await register(name, email, password)
         : await login(email, password);
 
-      if (loggedUser.role === 'admin') navigate('/admin');
-      else if (loggedUser.role === 'staff') navigate('/kitchen');
-      else navigate('/menu');
+      const requestedPath = location.state?.from;
+      if (requestedPath === '/cart') mergeGuestCartForUser(loggedUser.id);
+      if (requestedPath) navigate(requestedPath, { replace: true });
+      else if (loggedUser.role === 'admin') navigate('/admin', { replace: true });
+      else if (loggedUser.role === 'staff') navigate('/kitchen', { replace: true });
+      else navigate('/account', { replace: true });
     } catch (err) {
       setError(err.message);
     }
   };
+
+  if (user) {
+    return (
+      <div className="auth-container editorial-card">
+        <p className="eyebrow">Georgian Restaurant</p>
+        <h2>{t('You are already signed in.')}</h2>
+        <p>{t('Signed in as')} {user.name}</p>
+        <Link className="btn-primary account-login-link" to="/account">{t('Go to My Account')}</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-container editorial-card">
