@@ -11,8 +11,6 @@ import MyOrdersPage from './pages/MyOrdersPage';
 import StaffBoardPage from './pages/StaffBoardPage';
 import AdminPage from './pages/AdminPage';
 import LandingPage from './pages/LandingPage';
-import TeamPage from './pages/TeamPage';
-import ContactPage from './pages/ContactPage';
 import { LanguageProvider } from './context/LanguageContext';
 
 function AppContent() {
@@ -21,15 +19,13 @@ function AppContent() {
 
   return (
     <>
-      {!isLandingPage && <Navbar />}
+      <Navbar />
       <main className={isLandingPage ? 'landing-main' : 'main-content'}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/team" element={<TeamPage />} />
-          <Route path="/contact" element={<ContactPage />} />
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute allowedRoles={['customer']}><MyOrdersPage /></ProtectedRoute>} />
           <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['staff', 'admin']}><StaffBoardPage /></ProtectedRoute>} />
