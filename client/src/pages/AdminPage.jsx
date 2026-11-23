@@ -435,19 +435,6 @@ export default function AdminPage() {
               }
             />
 
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={itemForm.is_available}
-                onChange={(e) =>
-                  setItemForm({
-                    ...itemForm,
-                    is_available: e.target.checked,
-                  })
-                }
-              />
-              Available on customer menu
-            </label>
 
             <div className="action-buttons">
               <button type="submit" className="btn-primary">

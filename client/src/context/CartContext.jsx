@@ -3,6 +3,9 @@ import { useAuth } from './AuthContext';
 
 const CartContext = createContext(null);
 
+// Use a fresh guest-cart key so old test items from previous versions are ignored.
+const GUEST_CART_KEY = 'restaurant_cart_guest_v2';
+
 function readCart(storageKey) {
   try {
     const saved = localStorage.getItem(storageKey);
@@ -15,7 +18,7 @@ function readCart(storageKey) {
 
 export function CartProvider({ children }) {
   const { user, loading: authLoading } = useAuth();
-  const ownerKey = user ? `restaurant_cart_user_${user.id}` : 'restaurant_cart_guest';
+  const ownerKey = user ? `restaurant_cart_user_${user.id}` : GUEST_CART_KEY;
   const [cart, setCart] = useState([]);
   const [loadedKey, setLoadedKey] = useState(null);
 
@@ -71,7 +74,7 @@ export function CartProvider({ children }) {
   const clearCart = () => setCart([]);
 
   const mergeGuestCartForUser = (userId) => {
-    const guestCart = readCart('restaurant_cart_guest');
+    const guestCart = readCart(GUEST_CART_KEY);
     const accountKey = `restaurant_cart_user_${userId}`;
     const accountCart = readCart(accountKey);
     const merged = [...accountCart];
@@ -83,7 +86,7 @@ export function CartProvider({ children }) {
     });
 
     localStorage.setItem(accountKey, JSON.stringify(merged));
-    localStorage.removeItem('restaurant_cart_guest');
+    localStorage.removeItem(GUEST_CART_KEY);
     setCart(merged);
     setLoadedKey(accountKey);
   };
