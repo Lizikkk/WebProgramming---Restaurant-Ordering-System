@@ -6,7 +6,7 @@ A full-stack web application for a traditional Georgian restaurant. Customers ca
 The project was developed to practice full-stack development, database management, API integration, and user authentication.
 
 ## Design
-- **Figma:** 
+- **Figma:** https://www.figma.com/design/caf9hx2HubUDDd9NcpsZop/Restaurant-Website?node-id=9-184&t=2DsE0FuDhUBRYn7G-1
 
 ## Tech Stack
 - **Frontend:** React (Vite), React Router, Context API, CSS
